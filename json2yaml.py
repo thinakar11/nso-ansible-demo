@@ -4,20 +4,29 @@ import json
 import sys
 import yaml
 
-
 def _utf8_encode(obj):
     if obj is None:
         return None
-    if type(obj) is unicode:
-        return obj.encode('utf-8')
+    if sys.version_info[0] > 2:  # PY3
+        if isinstance(obj, str):  # in py3 str is unicode
+            return obj
+    else:                       # PY2
+        if type(obj) is unicode:  # in py2 unicode
+            return obj.encode('utf-8')
+
     if type(obj) is list:
         return [_utf8_encode(value) for value in obj]
     if type(obj) is dict:
         obj_dest = {}
-        for key, value in obj.iteritems():
-            obj_dest[_utf8_encode(key)] = _utf8_encode(value)
+        if sys.version_info[0] > 2:  # PY3
+            for key, value in obj.items():
+                obj_dest[_utf8_encode(key)] = _utf8_encode(value)
+        else:
+            for key, value in obj.iteritems():  # py2 obj.iteritems
+                obj_dest[_utf8_encode(key)] = _utf8_encode(value)
         return obj_dest
     return obj
+
 
 
 def main():
